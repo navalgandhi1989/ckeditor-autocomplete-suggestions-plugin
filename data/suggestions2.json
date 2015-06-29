@@ -1,0 +1,20 @@
+{
+    "sugggestions": [
+        {
+            "id": "text5",
+            "label": "Text 5"
+        },
+		{
+            "id": "text6",
+            "label": "Text 6"
+        },
+		{
+            "id": "text7",
+            "label": "Text 7"
+        },
+		{
+            "id": "text8",
+            "label": "Text 8"
+        }
+    ]
+}
