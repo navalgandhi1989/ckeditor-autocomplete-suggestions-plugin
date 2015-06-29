@@ -56,7 +56,7 @@ var Index = {
 	ajaxCall : function(urlForAjax,dataForAjax,successCallBack)
 	{
 		$.ajax({
-					type : 'POST',
+					type : 'GET',
 					url : urlForAjax,
 					data : dataForAjax,
 					contentType: "application/json",
