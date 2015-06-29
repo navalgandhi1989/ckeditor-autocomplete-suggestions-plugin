@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Ckeditor-autocomplete-suggestions-plugin by navalgandhi1989</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Ckeditor-autocomplete-suggestions-plugin</h1>
+      <h2 class="project-tagline">A Ckeditor Plugin to show suggestion while you type, the suggestion are defined by you and the action key to trigger plugin is also developer defined.</h2>
+      <a href="https://github.com/navalgandhi1989/-ckeditor-autocomplete-suggestions-plugin" class="btn">View on GitHub</a>
+      <a href="https://github.com/navalgandhi1989/-ckeditor-autocomplete-suggestions-plugin/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/navalgandhi1989/-ckeditor-autocomplete-suggestions-plugin/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="ckeditor-autocomplete-plugin" class="anchor" href="#ckeditor-autocomplete-plugin" aria-hidden="true"><span class="octicon octicon-link"></span></a>ckeditor-autocomplete-plugin</h1>
+
+<p>A Ckeditor Plugin to Show suggestion while you type, the suggestion are defined by you and the action key to trigger plugin is also developer defined.</p>
+
+<p>In order to make a suggestion box, you will have to make your custom plugin to use context menu as suggestion box, please check out the link for the basic knowledge of making ckeditor plugin from here a link</p>
+
+<p>Add this to your config.js, where autocomplete is name of the plugin</p>
+
+<p>config.extraPlugins = 'autocomplete';
+Then create a following directory structure/file in the ckeditor folder</p>
+
+<p>ckeditor-&gt;plugins-&gt;autocomplete-&gt;plugin.js
+Put the following content in your plugin.js file</p>
+
+<p>CKEDITOR.plugins.add('autocomplete',
+            {
+                init : function(editor) {</p>
+
+<pre><code>                 var autocompleteCommand = editor.addCommand('autocomplete', {
+                    exec : function(editor) {
+                        var dummyElement = editor.document
+                                .createElement('span');
+                        editor.insertElement(dummyElement);
+
+                        var x = 0;
+                        var y = 0;
+
+                        var obj = dummyElement.$;
+
+                        while (obj.offsetParent) {
+                            x += obj.offsetLeft;
+                            y += obj.offsetTop;
+                            obj = obj.offsetParent;
+                        }
+                        x += obj.offsetLeft;
+                        y += obj.offsetTop;
+
+                        dummyElement.remove();
+
+                        editor.contextMenu.show(editor.document
+                                .getBody(), null, x, y);
+                    }
+                });
+            },
+
+            afterInit : function(editor) {
+                editor.on('key', function(evt) {
+                    if (evt.data.keyCode == editor.config.suggestionsTriggerKey.keyCode) {
+                        editor.execCommand('autocomplete');
+                    }
+                });
+
+                var firstExecution = true;
+                var dataElement = {};
+
+                 editor.addCommand('reloadSuggetionBox', {
+                        exec : function(editor,suggestions) {
+                            if (editor.contextMenu) {
+                                dataElement = {};
+                                editor.addMenuGroup('suggestionBoxGroup');
+
+                        $.each(suggestions,function(i, suggestion)
+                        {
+                                var suggestionBoxItem = "suggestionBoxItem"+ i; 
+                                dataElement[suggestionBoxItem] = CKEDITOR.TRISTATE_OFF;
+                                editor.addMenuItem(suggestionBoxItem,
+                                                                    {
+                                    id : suggestion.id,
+                                    label : suggestion.label,
+                                    group : 'suggestionBoxGroup',
+                                    icon  : null,
+                                    onClick : function() {
+                                        var data = editor.getData();
+                                        var selection = editor.getSelection();
+                                        var element = selection.getStartElement();
+                                        var ranges = selection.getRanges();
+                                        ranges[0].setStart(element.getFirst(), 0);
+                                        ranges[0].setEnd(element.getFirst(),0);
+                                        editor.insertHtml(this.id + '&amp;nbsp;');
+                                        },
+                                        });
+                                });
+
+                                if(firstExecution == true)
+                                    {
+                                        editor.contextMenu.addListener(function(element) {
+                                            return dataElement;
+                                        });
+                                    firstExecution = false;
+                                    }
+                            }
+                        }
+                 });
+
+                delete editor._.menuItems.paste;
+            },
+        });
+</code></pre>
+
+<p>Here "suggestions" is the variable passed from a jquery file on your page, the variable holds a list of object having a 'id' and 'label' to be shown in suggestion.</p>
+
+<p>Now in order to configure these suggestions, please perform the following jquery code, after this, whenever '#' is pressed, suggestions will be shown</p>
+
+<pre><code>$('textarea').ckeditor();
+//Here "CKEDITOR.SHIFT + 51" is the key combination for '#'
+$('textarea#ckeditorBox').ckeditor({ suggestionsTriggerKey: { keyCode: CKEDITOR.SHIFT + 51 }});
+    CKEDITOR.on( 'instanceReady', function( evt ) {
+        //Here 'Index.suggestions' is the Array which is holding the current list of suggestions
+        CKEDITOR.instances.ckeditorBox.execCommand('reloadSuggetionBox',Index.suggestions);
+    });
+</code></pre>
+
+<p>This will load the ckeditor("ckeditor" is name of my ckeditor instance) and configure the plugin to show suggestions currently present int the "Index.suggestions" variable, anytime you need to refresh/change the suggestions you just need to call this function after reloading "Index.suggestions" variable</p>
+
+<pre><code>CKEDITOR.instances.ckeditorBox.execCommand('reloadSuggetionBox',Index.suggestions);
+</code></pre>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/navalgandhi1989/-ckeditor-autocomplete-suggestions-plugin">Ckeditor-autocomplete-suggestions-plugin</a> is maintained by <a href="https://github.com/navalgandhi1989">navalgandhi1989</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
+
